@@ -27,18 +27,70 @@ class MyApp extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   HomeScreen({Key? key}) : super(key: key);
 
-  final Stream<QuerySnapshot> notes =
-      FirebaseFirestore.instance.collection('notes').snapshots();
+  final titleController = TextEditingController();
+  final desCriptionController = TextEditingController();
+
+  // final Stream<QuerySnapshot> notes =
+  //     FirebaseFirestore.instance.collection('notes').snapshots();
 
   @override
   Widget build(BuildContext context) {
+    CollectionReference notes = FirebaseFirestore.instance.collection('notes');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fire Note'),
       ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: (() {
+          showModalBottomSheet(
+              context: context,
+              builder: (c) {
+                return Container(
+                  padding: const EdgeInsets.all(18),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: titleController,
+                        decoration: const InputDecoration(
+                          hintText: 'Title',
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      TextField(
+                        controller: desCriptionController,
+                        decoration: const InputDecoration(
+                          hintText: 'description',
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      MaterialButton(
+                        onPressed: () {
+                          notes.add({
+                            'title': titleController.text,
+                            'description': desCriptionController.text,
+                          });
+                        },
+                        child: const Text('Add Note'),
+                      ),
+                    ],
+                  ),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                );
+              });
+        }),
+      ),
       body: Center(
         child: StreamBuilder(
-          stream: notes,
+          stream: notes.snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.hasError) {
